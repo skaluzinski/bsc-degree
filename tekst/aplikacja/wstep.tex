@@ -1,0 +1,11 @@
+Głównym celem w czasie implementacji aplikacji mobilnej była implementacja aplikacji używającej odpowiednich praktyk programistycznego tworzenia aplikacji mobilnych takich jak:
+\begin{itemize}
+    \item[--] architektura MVVM,
+    \item[--] odpowiednie odseparowanie warstw od siebie,
+    \item[--] wykorzystanie podglądów ui bez konieczności uruchamiania aplikacji,
+    \item[--] wykorzystanie takich podejść jak Unidirectional Data Flow, Dependency Injection, Reactive Programming.
+\end{itemize}
+Najważniejszym aspektem z wyżej wymienionych było odpowiednie odseparowanie warstw od siebie.
+Jest to ważne z tego względu, że użycie technologii Kotlin Multiplatform będzie niezwykle ciężkie do zrealizowania w sytuacji, gdy w klasach, które mają być współdzielone, będą znajdować się zależności od konkretnych platform.
+Przykładem tego może być klasa odpowiedzialna za pobieranie danych z internetu.
+Jeżeli w tej klasie umieścimy zależności należące tylko do androida tak jak np \texttt{android.content.Context}, to nie będzie możliwe użycie tej klasy w kodzie współdzielonym do momentu refaktoryzacji.

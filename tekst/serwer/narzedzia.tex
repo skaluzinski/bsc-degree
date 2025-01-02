@@ -1,0 +1,261 @@
+\section{Lista użytych technologii}
+Do zaimplementowania aplikacji serwerowej zostały użyte następujące technologie, po odpowiednim porównaniu i analizie:
+\begin{itemize}
+    \item Java 21
+    \item Gradle
+    \item Kotlin
+    \item JUnit
+    \item Kotest
+    \item Spring Boot
+    \item PostgreSQL
+    \item Docker-Compose
+\end{itemize}
+\subsection{Java 21}\label{subsec:uzyte-technologie-java}
+Java 21 została użyta podczas budowania aplikacji zarówno serwerej jak i mobilnej.
+Jest to spowodowane powszechnością tego środowiska co znacznie ułatwia ustawienie środowiska deweloperskiego pomiędzy róznymi systemami operacyjnymi.
+Pod wezględem developmentu java nie została użyta do napisania ani jednej linijki kodu.
+Język ten niesie ze sobą wiele zalet, takich jak wieloletnie wsparcie, ogromna i niezwykle aktywna społeczność, wiele poradników oraz artukułów na rozwoju projektów w tym języku.
+Problemem jednak jest nullowalność, która jest w Javie ogromnym problemem.
+Historycznie NullPointerExeption jest jednym z najpopularniejszym wyjątków doświadczanych przez programistów, w szczegółności Javy.
+Null jest domyślną wartością każdej zmiennej w tym języku, powoduje to, że programista musi wykonywać niezliczoną ilość sanity checków, które zazwyczaj są kompletnie zbędne.
+Dodatkowo powoduje to, że duża ilość kodu jest trudniejsza do odczytu.
+\begin{lstlisting}[caption=Przykład obsługi null (Java)]
+void someMethod(List<Item> items) {
+    if (items == null) {
+        throw new IllegalArgumentException("Items cannot be null");
+    }
+
+    if (items.isEmpty()) {
+        throw new IllegalArgumentException("Items cannot be empty");
+    }
+
+    ...
+}
+\end{lstlisting}
+W danym przykładzie możemy  zauwżyć, że programista został zmuszony do sprawdzenia dwóch warunków krańcowych.
+Jeden z nich jest spowodowany wyłącznie przez platformę jaką jest java.
+Zmienna items będącą nullem może sugerować, że lista nie została ale jednocześnie może sugerować też, że lista jest pusta.
+Sytuacje tego typu powodują, że kod jest znacznie cięższy do interpretacji.
+Dodatkowo nie zawsze możemy być pewni, że osoby używające naszej biblioteki będą poprawnie odróżniać kiedy null powinien być przekazywany a kiedy pusta lista.
+Problemy takie mogą zostać rozwiązane przez użycie zewnętrznych bibliotek, na przykład Lombok.
+Lombok pozwala na automatycznie generowanie kodu, który zazwyczaj był pisany ręcznie przez programistów.
+Mowa tutaj o takich funkcjach jak gettery, settery i inne tego typu funkcjonalności, które są powtarzalne niezależnie od kontektu występowania.
+\begin{lstlisting}[caption=Przykład obsługi null (Java z Lombok)]
+void someMethod(@NonNull List<Item> items) {
+    if (items.isEmpty()) {
+        throw new IllegalArgumentException("Items cannot be empty");
+    }
+
+    ...
+}
+\end{lstlisting}
+W powyższym przykładzie została użyta adnotacja @NotNull, która automatycznie generuje sanity check dla pola, które zostało oznaczone tą adnotacją.
+Powyższy kod jest czytelniejszy i nie wymaga sprawdzenia czy przekazywana zmienna jest nullem, jednak nie pozbywamy się problemu nullowalności.
+Jedynie zwiększamy czytelność kodu, adnotacja wygenerowała automatycznie kod, który wykonuje to sprawdzenie zamiast programisty.
+W rzeczywistości kod z przykładu numer 2 jest identyczny z kodem z przykładu numer 1, jedynie pierwszy warunek został automatycznie wygenerowany przez Lombok.
+
+\begin{lstlisting}[caption=Przykład w języku Kotlin]
+fun someMethod(items: List<Item>) {
+    require(items.isNotEmpty()) { "Items cannot be empty" }
+
+    ...
+}
+\end{lstlisting}
+Powyższy przykład demonstruje prawie równoznaczny kod w języku Kotlin, największą różnicą jest to, że zmienna "items" nie może być nullem.
+Kotlin nie pozwala na niejawne przekazanie nulli, co znacząco eliminuje problem rozgałęzień w logice jeśli nie jest to wymagane przez logikę biznesową.
+\begin{lstlisting}[caption=Przykład w języku Kotlin]
+fun someMethod(items: List<Item>?) {
+    if (items == null) {
+        throw IllegalArgumentException("Items cannot be null")
+    }
+
+    if (items.isEmpty()) {
+        throw IllegalArgumentException("Items cannot be empty")
+    }
+    ...
+}
+\end{lstlisting}
+Powyższy przykład pokazuje równoznaczy kod w języku kotlin do Javy z przykładu numer 1.
+Dużą różnicą jest to, że w kotlinie zmienna nie może posiadać wartości null jeśli nie jest to jawnie zadeklarowane.
+Znacznie ulepsza to czytelność kodu oraz wymusza użytkownika narzędzi do przekazywania list z odpowiednią wartością.
+Powoduje to, że kod jest znacznie bardziej czytelny oraz łatwiejszy do zrozumienia.
+\subsection{Gradle}\label{subsec:uzyte-technologie-gradle}
+Jako narzędzie do budowania projektu oraz zarządzania wybrałem Gradle.
+Dużą zaletą w porównaniu do Maven jest deklaratywność w definiowaniu zależności oraz konfiguracji projektu.
+Maven jest oparty na instrucjach, Gradle jest oparty na deklaracjach.
+\cite{mavenDefinitiveGuide}
+\cite{gradleForAndroid}
+W aplikacji serwerowej zależało mi na możliwości automatyzacji wielu procesów związanych z budowaniem projektu oraz lepszego śledzenia zależności między modułami.
+Gradle pozwala na zbudowanie drzewa zależności pokazującego jakie moduły zależą od siebie.
+Przykładowe drzewo zależności dla projektu Android pt. \href{https://github.com/savvasdalkitsis/module-dependency-graph?tab=readme-ov-file}{} Game Frame
+\begin{figure}[H]
+    \centering
+    \clearpage
+    \includegraphics[width=15cm,keepaspectratio]{rysunki/module_graph.png}
+    \caption{Przykładowe drzewo zależności w projekcie Game Frame, źródło: https://github.com/savvasdalkitsis/module-dependency-graph?tab=readme-ov-file}
+    \label{fig:gameframe-deps-tree}
+\end{figure}
+Dodatkowo możliwe jest szybkie napisanie pluginu, który pozwoliłby na zbadanie bibliotek, frameworków oraz innych zależności używanych w projekcie przez wszystkie moduły pod kątem znalezienia części wspólnej.
+Również niezwykle przydatną funkcjonalnością gradle jest możliwość zbudowania drzewa zależności w ramach jednego modułu.
+\cite{gradleDepsTree}
+\begin{figure}[H]
+    \centering
+    \clearpage
+    \includegraphics[width=10cm,keepaspectratio]{rysunki/gradle-deps-tree.png}
+    \caption{Przykładowe drzewo zależności w module, źródło: https://blog.droidchef.dev/mastering-the-gradle-dependency-tree/}
+    \label{fig:module-deps-tree}
+\end{figure}
+
+\subsection{Kotlin}\label{subsec:uzyte-technologie-kotlin}
+Do samej implementacji aplikacji serwerowej wybrałem język Kotlin jako główny język programowania.
+Kotlin jest językiem wspierający zarówno paradygmaty programowania obiektowego jak i funkcyjnego, jednocześnie jest w pełni interoperacyjny z Javą.
+Pozwala to na stopniowe przechodzenie z Javy na Kotlin w projektach z znacznie większym długiem technologicznym.
+Dodatkowo Kotlin pozwala na swobodne wywołanie kodu Javy wewnątrz Kotlina, pozwala to na łatwe wykorzystanie dotychczasowego zbioru bibliotek napisanych w Javie.
+Frameworki czy też biblioteki dotychczas pisane do użytku w projektach Javowych mogą więc być używane w projektach Kotlinowych bez konieczności ich przepisywania.
+Przykładem takiej biblioteki jest Spring, jeden z najpopularniejszych frameworków do tworzenia aplikacji backendowych na świecie.
+Dużą zaletą Kotlina jest silne typowanie jak i brak domyślnej wartości null kryjącej się pod każdą zmienną.
+Dodatkowo język pozwala na wiele uproszczeń składniowych, które znacznie ułatwiają pisanie kodu czy też wiele ułatwień slużących do łatwiejszej interakcji z kodem, nad którym nie mamy kontroli.
+Przykładem tego mogą być extension functions, które pozwalają na dodanie nowych funkcji do istniejących klas, bez konieczności dziedziczenia po nich lub extension properties, które pozwalają na dodanie dodatkowych pół.
+Załózmy, że zewnętrzna biblioteka zwraca nam klasę, która odwzorowuje użytkownika.
+\begin{lstlisting}[caption=Przykład klasy User w Javie]
+public class User {
+    private String name;
+    private String surname;
+    private LocalDateTime birthDate;
+
+    public User(String name, String surname, LocalDateTime birthDate) {
+        this.name = name;
+        this.surname = surname;
+        this.birthDate = birthDate;
+    }
+}
+\end{lstlisting}
+Chcemy dodać do tej klasy funkcję, która sprawdzi czy dany użytkownik jest uprawniony do głosowania w danym kraju, dodatkowo chcemy zwrócić informację o tym czy użytkownik jest powyżej 18 roku życia.
+Załóżmy, że chcemy tą klasę rozszerzyć o kilka funkcjonalności potrzebnych nam w naszym projekcie bez konieczności zmiany kodu źródłowego tej klasy:
+\begin{itemize}
+    \item funkcja, która sprawdzi czy użytkownik jest uprawniony do głosowania w danym kraju
+    \item pole, które zwróci wiek użytkownika
+    \item pole, które zwróci czy użytkownik jest powyżej 18 roku życia
+\end{itemize}
+
+\begin{lstlisting}[caption=Extension function sprawdzające czy użytkownik jest uprawniony do głosowania w w danym kraju]
+fun User.canVote(country: Locale): Boolean {
+    val votingAge = when (country) {
+        Locale.US -> 18
+        Locale.UK -> 18
+        Locale.GERMANY -> 16
+        else -> 18
+    }
+    return age >= votingAge
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Extension property zwracające wiek użytkownika]
+val User.age: Int
+    get() = Period.between(birthDate.toLocalDate(), LocalDate.now()).years
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Extension property zwracające czy użytkownik jest powyżej 18 roku życia]
+val User.isAdult: Boolean
+    get() = age >= 18
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Przykład użycia extension functions]
+val user = User("Jan", "Kowalski", LocalDateTime.of(2000, 1, 1, 0, 0))
+val isAdult = user.isAdult
+val canVote = user.canVote(Locale.US)
+println("Is user adult: $isAdult, can vote: $canVote")
+\end{lstlisting}
+\begin{lstlisting}[caption=Wynik]
+Is user adult: true, can vote: true
+\end{lstlisting}
+Dodatkową zaletą w porównaniu do Javy jest strukturalna współbieżność, pozwala ona na prostsze tworzenie wielowątkowych aplikacji.
+\cite{structuredConcurrency}
+Hierarchiczna struktura, która jest wymuszona dla zadań współbieżnych sprawia, że jako programista nie musimy zarządzać anulowaniem zadań w ramach zdefiniowanego zakresu współbieżności.
+Korutyny w Kotlinie pozwalają na tworzenie zadań współbieżnych, które są zarządzane przez strukturę, która je stworzyła.\cite{effectiveKotlin}
+Zakres korutyn zarządza ich cyklem życia, w przypadku anulowania zakresu, wszystkie korutyny wewnątrz niego dostają sygnał do zakończenia swojego działania dzięki propagacji anulowania w górę hierarchii.
+Propagacja wydarzeń w zakresie korutyn pozwala uniknąć wycieków pamięci czy też innych problemów związanych z zarządzaniem zadaniami współbieżnymi.
+\begin{lstlisting}[caption=Przykład korutyny w Kotlinie]
+runBlocking {
+    println("Program starts")
+
+    val parentJob = launch { // Parent scope
+        val childJob1 = launch { // Child scope
+            repeat(5) { i ->
+                println("Child 1: Doing work $i")
+                delay(500)
+            }
+        }
+
+        val childJob2 = launch { // Child scope
+            repeat(5) { i ->
+                println("Child 2: Doing work $i")
+                delay(500)
+            }
+        }
+
+        delay(1200) // Parent scope waits for 1.2 seconds
+        println("Parent coroutine: Cancelling all children")
+        cancel() // Cancelling parent scope cancels all children
+    }
+
+    parentJob.join() // Wait for parent job to finish
+    println("Program ends")
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=Wynik]
+Program starts
+Child 1: Doing work 0
+Child 2: Doing work 0
+Child 1: Doing work 1
+Child 2: Doing work 1
+Child 1: Doing work 2
+Child 2: Doing work 2
+Parent coroutine: Cancelling all children
+Program ends
+\end{lstlisting}
+\subsection{JUnit}\label{subsec:uzyte-technologie-junit}
+Jeśli chodzi o testowanie aplikacji serwerowej, wybrałem JUnit jako framework do testów jednostkowych.
+Jest to jeden z najpopularniejszych frameworków, prawdopodobnie najpopularniejszy w języku Java.
+
+\subsection{Kotest}\label{subsec:uzyte-technologie-kotest}
+Kotest jest również frameworkiem do testów jednostkowych, jego główną zaletą jest deklaratywność w porównaniu do JUnit.
+Biblioteka ta pozwala na testowanie zależności między warstwami kodu.
+Przykładem może być testowanie tego czy przypadkiem klasa z warstwy domenowej nie polega na klasach z warstwy obsługi zapytań użytkownika.
+\begin{lstlisting}[caption=Przykład testu w Kotest]
+@Test
+fun `domain classes should not depend on rooting classes`() {
+    val forbiddenPackage = "com.example.ui"
+    val rootingClasses = getClassesInPackage("com.example.rooting")
+
+    rootingClasses.forEach { clazz ->
+        val imports = clazz.getImportedClasses()
+        val domainDependsOnRooting = imports.any { it.startsWith(forbiddenPackage) }
+
+        assertFalse(domainDependsOnRooting) { "${clazz.simpleName} depends on UI classes" }
+    }
+}
+\end{lstlisting}
+
+\subsection{Spring Boot}\label{subsec:uzyte-technologie-spring-boot}
+Wybrałem Spring Boot jako framework do implementacji aplikacji serwerowej zamiast tradycyjnego Springa z powodu jego prostoty w konfiguracji.
+Czysty Spring pozwala na znacznie większą kontrolę nad funkcjonalnościami i samym działaniem aplikacji, jednak wiąże to się z ogromnym narzutem ilości konfiguracji.
+Wybranie czystego Springa zamiast Spring Boota wymagałoby znacznie większego nakładu pracy.
+W aktualnym projekcie zależało mi na skalowalności oraz łatwości utrzymaniam, dlatego wybrałem Spring Boot.
+Sama zamiana Spring Boota na Springa nie byłaby problematyczna dzięki architekturze aplikacji.
+Wielomodularny monolit, który został zaimplementowany pozwala na łatwą podmianę frameworka tylko w jednym module.
+
+\subsection{PostgreSQL}\label{subsec:uzyte-technologie-postgresql}
+Jako bazę danych wybrałem PostgreSQL.
+Jest to jedna z najpopularniejszych baz danych open-source na świecie, jego prostota w konfiguracji, ogromna ilość dokumentacji oraz szybkość działania sprawiają, że nie rozważałem innych rozwiązań.
+PostgreSQL pozwala na łatwe skalowanie, zarówno wertykalne jak i horyzontalne.
+Jeśli mowa o horyzontalnym skalowanie to wystarczyłoby użyć takich praktyk jak sharding lub replikacja.
+Sharding pozwala na podzielenie bazy danych na mniejsze części, które są przechowywane na różnych serwerach.
+W przypadku skalowania wertykalnego, PostgreSQL pozwala na monitorowanie najbardziej kosztownych zapitań, automatyczne partycjonowanie, automatyczną kompresję oraz wiele innych funkcji, które pozwalają na zwiększenie wydajności bazy danych.
+
+\subsection{Docker-Compose}\label{subsec:uzyte-technologie-docker-compose}
+Do konteneryzacji aplikacji serwerowej wybrałem Docker-Compose.
+Docker-Compose pozwala na łatwe zarządzanie wieloma kontenerami jednocześnie.
+Użycie Docker-Compose pozwoliło mi na łatwe uruchomienie bazy danych, aplikacji serwerowej oraz innych usług, które były potrzebne do działania aplikacji niezależnie od systemu operacyjnego.
+Było to znacznym ułatwieniem w czasie developmentu zarówno przy użyciu systemu Windows jak i Ubuntu.
+\cite{postgresSharding}

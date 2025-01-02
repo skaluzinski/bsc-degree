@@ -415,11 +415,13 @@
 % -------------------------------------------------------------------
 \RequirePackage{graphicx}
 \graphicspath{{gfx/}{rysunki/}}
+\RequirePackage{float}
 
 % -------------------------------------------------------------------
 % Listingi programów
 % -------------------------------------------------------------------
 \RequirePackage{listings}
+\RequirePackage[T1]{fontenc}
 \lstdefinestyle{EEStyle}{
     backgroundcolor=\color{white},
     commentstyle=\color{EEBlueDark},
@@ -512,6 +514,8 @@
 % W celu umieszczenia PDF z "Oświadczeniami"
 % -------------------------------------------------------------------
 \RequirePackage{tikz}
+\RequirePackage{graphicx}
+\RequirePackage{graphicx}
 %\RequirePackage[absolute,overlay]{textpos}
 
 \newcommand{\grantlicense}[1]{
