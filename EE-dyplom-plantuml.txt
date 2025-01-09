@@ -1,0 +1,7 @@
+@startuml
+left to right direction
+actor Teacher
+Teacher -> (Zalogowanie)
+Teacher -> (Wylogowanie)
+Teacher -> (Dodanie nowego kursu)
+@enduml

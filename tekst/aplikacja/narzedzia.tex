@@ -1,1 +1,138 @@
 \section{Lista użytych technologii}
+\subsubsection{Kotlin}\label{app:used_technologies:kotlin}
+Aplikacja mobilna została w całości zaimplementowana z pomocą języka programowania Kotlin.
+Kotlin został oficjalnie wybrany przez Google jako preferowany język programowania dla aplikacji mobilnych na platformę Android 7 maja 2019 roku.
+\cite{kotlinWikipedia}
+W przypadku aplikacji mobilnej wybranie Javy zamiast Kotlina skutkowałoby w byciu zmuszonym do imperatywnego frameworka do tworzenia widoków.
+Java nie pozwala na użycie deklaratywnego frameworka oraz ten język nie jest już rozwijany przez Google od wielu lat.
+Z tego powodu wybranie Javy skutkowałoby w przyszłym "tech debt".
+W momencie pisania aplikacji tworzylibyśmy kod, który staje się obciążeniem i problemem w przyszłości od momentu wytworzenia go.
+Użycie technologii, która nie jest rozwijana i będzie wymagała przepisania możemy uznać za źródło długu wdrożeniowego.
+\cite{legacyDebt}
+Rozwijanie nowego projektu z już obecnym długiem technologicznym jest równoznaczne z zaciągnięciem długu technologicznego, który będzie musiał zostać spłacony w przyszłości.
+Dług technologiczny (ang. technical debt) jest terminem używanym do opisania różnicy między aktualnym stanem naszego rozwiązania a idealnym stanem, do którego powinno się dążyć w celu uzyskania skalowanego produktu, który jest łatwy w utrzymaniu.
+\cite{techDebtAccerelate}
+
+\subsection{Compose}\label{app:used_technologies:compose}
+Compose to deklaratywny framework do tworzenia interfejsów użytkownika w języku Kotlin.
+Deklaratywność pozwala skupić się programiście na opisaniu zachowania interfejsu zamiast skupiania się na manipulacji samym wyglądem interfejsu.
+W przeciwieństwie do imperatywnego podejścia, które było preferowanym sposobu tworzenia interfejsu przez ponad 13 lat, compose wymaga odpowiedniego oddzielenia stanu od widoku.
+Framework ten działa na podstawie tworzenia drzewa widoków, które jest renderowane na ekranie.
+\cite{composeTree}
+W momencie kiedy zmienia się wartość przekazywana jako parametr do widoku, framework automatycznie przerysowuje widok.
+Sytuację tą nazywamy rekompozycją.
+\cite{composeRecomposition}
+Framework decyduje czy należy wykonać rekompozycję na podstawie zmiany wartości przekazywanej do widoku, która jest sprawdzana za pomocą metody \texttt{equals}.
+Dlatego ważne jest aby przekazywać do widoków jak najprostsze obiekty.
+Każde porównanie wartości przekazywanych ma swój koszt obliczeniowy.
+Im bardziej złożony obiekt przekazujemy do widoku, tym więcej czasu zajmie porównanie go z poprzednią wartością.
+Pojedyńcze obiekty stanowiłyby problemu, jednak w sytuacji gdy nasza aplikacja miałaby dziesiątki widoków, które musiałyby sprawdzać obiekty będące boskimi obiektami (ang. god objects), mogłoby to spowodować spadek wydajności aplikacji.
+\cite{godObjectWikipedia}
+Wymusza to na programiście odpowiednie rozdzielenie stanu danej części aplikacji od innych części, przekazywanie wcześniej wymienionych boskich obiektów do rożnych części aplikacji powodoałoby konieczność rekompozycji całej aplikacji.
+Można to zoobrazować na przykładzie sytuacji kiedy zmiana wpisanego tekstu w formularzu powoduje konieczność ponownego obliczenia całego drzewa widoków.
+Dodatkowo framework ten opiera się na paradygmacie kompozycji zamiast dziedziczenia.
+W przypadku androida, dziedziczenie widoków było jednym z największych problemów, które wraz z czasem urosły do nieprzewidywalnych rozmiarów.
+Każdy widok dziedziczył po klasie \texttt{View}, co powodowało, że każdy widok również dziedziczył problemy występujące pośród 40 tysięcy linii kodu.
+Wraz z czasem pojawiały się problemy, które zostały zignorowane przez firmy tworzące swoje nakładki na androida.
+Rozwiązanie problemów występujące na oryginalnej platformie w połączeniu z problemami występującymi na nakładkach powodowały, że systemy stawały się coraz bardziej niestabilne i trudniejsze w utrzymaniu.
+Aby zaimplementować prostą listę elementów w XMLu, programista musiał zaimplementować dziedziczenie po klasie \texttt{ListView}, która dziedziczyła po klasie \texttt{ViewGroup}, która dziedziczyła po klasie \texttt{View}.
+Dodatkowo trzeba stworzyć odpowiedni adapter, który będzie odpowiedzialny za przekazywanie danych do widoku.
+Finalnie trzeba przypisać adapter do widoku, zaaktualizować widok i przekazać dane do adaptera.
+Przykład widoku:
+\begin{lstlisting}[language=xml]
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:listitem="@layout/item_layout" />
+    </FrameLayout>
+\end{lstlisting}
+Przykład implementacji pojedyńczego widoku w liście:
+\begin{lstlisting}[language=xml]
+<TextView
+    android:id="@+id/itemText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:textSize="16sp" />
+\end{lstlisting}
+Przykład implementacji adaptera:
+\begin{lstlisting}[language=Kotlin]
+class ItemAdapter(private val items: List<Item>) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
+        return ItemViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        holder.bind(items[position])
+    }
+
+    override fun getItemCount(): Int = items.size
+
+    class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val itemText: TextView = itemView.findViewById(R.id.itemText)
+
+        fun bind(item: Item) {
+            itemText.text = item.text
+        }
+    }
+}
+\end{lstlisting}
+Finalnie należy przypisać adapter do widoku:
+\begin{lstlisting}[language=Kotlin]
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val items = listOf(Item("Item 1"), Item("Item 2"), Item("Item 3"))
+        recyclerView.adapter = ItemAdapter(items)
+    }
+}
+\end{lstlisting}
+Równoznaczny kod w compose do utworzenia widoku
+\begin{lstlisting}[language=Kotlin]
+@Composable
+fun ItemList(
+    myItems: List<Item>
+) {
+    Column {
+        myItems.forEach { item ->
+            Text(text = item.text)
+        }
+    }
+}
+\end{lstlisting}
+Przypisanie widoku do aktywności aplikacji:
+\begin{lstlisting}[language=Kotlin]
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val items = listOf(Item("Item 1"), Item("Item 2"), Item("Item 3"))
+            ItemList(items)
+        }
+    }
+}
+\end{lstlisting}
+Dodatkowym plusem jest to, że całośc rozwoju aplikacji odbywa się w jednym języku programowania.
+Sztuczna inteligencja w IDE pozwala na szybkie i sprawne podpowiedzi, które znacznie przyspieszają proces tworzenia aplikacji.
+\subsection{Koin}\label{app:used_technologies:koin}
+Do wstrzykiwania zależności w aplikacji został użyty framework Koin.
+Jest on biblioteką, która pozwala na wstrzykiwanie zależności w sposób deklaratywny, dodatkowo jest możliwa do wykorzystania w przypadku aplikacji androidowych, backendowych, desktopowych oraz wieloplatformowych.
+Pozwala to na przygotowanie aplikacji, która może być łatwo przenoszona między różnymi platformami.
+Dzięki temu przygotowaniu wystarczyłoby zmienić implementację danego interfejsu odpowiednio dla platformy, a cała reszta aplikacji pozostałaby bez zmian.
+\cite{koinMultiplatform}
+
+\subsubsection{Ktor}\label{app:used_technologies:ktor}
+Ktor jest biblioteką do tworzenia serwerów HTTP w języku Kotlin oraz klientów HTTP.
+Użycie tej biblioteki pozwala uniknąć potrzeby przepisywania kodu w sytuacji chęci uczynienia z aplikacji natywnej aplikację wieloplatformową.
+Pozwala to na wykorzystanie napisanego kodu na aplikację androidową jako wspólny kod dla aplikacji wieloplatformowej.
+\cite{ktorMultiplatform}

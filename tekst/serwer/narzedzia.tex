@@ -19,7 +19,7 @@ Problemem jednak jest nullowalność, która jest w Javie ogromnym problemem.
 Historycznie NullPointerExeption jest jednym z najpopularniejszym wyjątków doświadczanych przez programistów, w szczegółności Javy.
 Null jest domyślną wartością każdej zmiennej w tym języku, powoduje to, że programista musi wykonywać niezliczoną ilość sanity checków, które zazwyczaj są kompletnie zbędne.
 Dodatkowo powoduje to, że duża ilość kodu jest trudniejsza do odczytu.
-\begin{lstlisting}[caption=Przykład obsługi null (Java)]
+\begin{lstlisting}[caption=Przykład obsługi null (Java), language=java]
 void someMethod(List<Item> items) {
     if (items == null) {
         throw new IllegalArgumentException("Items cannot be null");
@@ -40,7 +40,7 @@ Dodatkowo nie zawsze możemy być pewni, że osoby używające naszej biblioteki
 Problemy takie mogą zostać rozwiązane przez użycie zewnętrznych bibliotek, na przykład Lombok.
 Lombok pozwala na automatycznie generowanie kodu, który zazwyczaj był pisany ręcznie przez programistów.
 Mowa tutaj o takich funkcjach jak gettery, settery i inne tego typu funkcjonalności, które są powtarzalne niezależnie od kontektu występowania.
-\begin{lstlisting}[caption=Przykład obsługi null (Java z Lombok)]
+\begin{lstlisting}[caption=Przykład obsługi null (Java z Lombok), language=java]
 void someMethod(@NonNull List<Item> items) {
     if (items.isEmpty()) {
         throw new IllegalArgumentException("Items cannot be empty");
@@ -54,7 +54,7 @@ Powyższy kod jest czytelniejszy i nie wymaga sprawdzenia czy przekazywana zmien
 Jedynie zwiększamy czytelność kodu, adnotacja wygenerowała automatycznie kod, który wykonuje to sprawdzenie zamiast programisty.
 W rzeczywistości kod z przykładu numer 2 jest identyczny z kodem z przykładu numer 1, jedynie pierwszy warunek został automatycznie wygenerowany przez Lombok.
 
-\begin{lstlisting}[caption=Przykład w języku Kotlin]
+\begin{lstlisting}[caption=Przykład w języku Kotlin, language=Kotlin]
 fun someMethod(items: List<Item>) {
     require(items.isNotEmpty()) { "Items cannot be empty" }
 
@@ -63,7 +63,7 @@ fun someMethod(items: List<Item>) {
 \end{lstlisting}
 Powyższy przykład demonstruje prawie równoznaczny kod w języku Kotlin, największą różnicą jest to, że zmienna "items" nie może być nullem.
 Kotlin nie pozwala na niejawne przekazanie nulli, co znacząco eliminuje problem rozgałęzień w logice jeśli nie jest to wymagane przez logikę biznesową.
-\begin{lstlisting}[caption=Przykład w języku Kotlin]
+\begin{lstlisting}[caption=Przykład w języku Kotlin, language=Kotlin]
 fun someMethod(items: List<Item>?) {
     if (items == null) {
         throw IllegalArgumentException("Items cannot be null")
@@ -117,7 +117,7 @@ Dużą zaletą Kotlina jest silne typowanie jak i brak domyślnej wartości null
 Dodatkowo język pozwala na wiele uproszczeń składniowych, które znacznie ułatwiają pisanie kodu czy też wiele ułatwień slużących do łatwiejszej interakcji z kodem, nad którym nie mamy kontroli.
 Przykładem tego mogą być extension functions, które pozwalają na dodanie nowych funkcji do istniejących klas, bez konieczności dziedziczenia po nich lub extension properties, które pozwalają na dodanie dodatkowych pół.
 Załózmy, że zewnętrzna biblioteka zwraca nam klasę, która odwzorowuje użytkownika.
-\begin{lstlisting}[caption=Przykład klasy User w Javie]
+\begin{lstlisting}[caption=Przykład klasy User w Javie, language=java]
 public class User {
     private String name;
     private String surname;
@@ -138,7 +138,7 @@ Załóżmy, że chcemy tą klasę rozszerzyć o kilka funkcjonalności potrzebny
     \item pole, które zwróci czy użytkownik jest powyżej 18 roku życia
 \end{itemize}
 
-\begin{lstlisting}[caption=Extension function sprawdzające czy użytkownik jest uprawniony do głosowania w w danym kraju]
+\begin{lstlisting}[caption=Extension function sprawdzające czy użytkownik jest uprawniony do głosowania w w danym kraju, language=Kotlin]
 fun User.canVote(country: Locale): Boolean {
     val votingAge = when (country) {
         Locale.US -> 18
@@ -150,17 +150,17 @@ fun User.canVote(country: Locale): Boolean {
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Extension property zwracające wiek użytkownika]
+\begin{lstlisting}[caption=Extension property zwracające wiek użytkownika, language=Kotlin]
 val User.age: Int
     get() = Period.between(birthDate.toLocalDate(), LocalDate.now()).years
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Extension property zwracające czy użytkownik jest powyżej 18 roku życia]
+\begin{lstlisting}[caption=Extension property zwracające czy użytkownik jest powyżej 18 roku życia, language=Kotlin]
 val User.isAdult: Boolean
     get() = age >= 18
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Przykład użycia extension functions]
+\begin{lstlisting}[caption=Przykład użycia extension functions, language=Kotlin]
 val user = User("Jan", "Kowalski", LocalDateTime.of(2000, 1, 1, 0, 0))
 val isAdult = user.isAdult
 val canVote = user.canVote(Locale.US)
@@ -175,7 +175,7 @@ Hierarchiczna struktura, która jest wymuszona dla zadań współbieżnych spraw
 Korutyny w Kotlinie pozwalają na tworzenie zadań współbieżnych, które są zarządzane przez strukturę, która je stworzyła.\cite{effectiveKotlin}
 Zakres korutyn zarządza ich cyklem życia, w przypadku anulowania zakresu, wszystkie korutyny wewnątrz niego dostają sygnał do zakończenia swojego działania dzięki propagacji anulowania w górę hierarchii.
 Propagacja wydarzeń w zakresie korutyn pozwala uniknąć wycieków pamięci czy też innych problemów związanych z zarządzaniem zadaniami współbieżnymi.
-\begin{lstlisting}[caption=Przykład korutyny w Kotlinie]
+\begin{lstlisting}[caption=Przykład korutyny w Kotlinie, language=Kotlin]
 runBlocking {
     println("Program starts")
 
@@ -222,7 +222,7 @@ Jest to jeden z najpopularniejszych frameworków, prawdopodobnie najpopularniejs
 Kotest jest również frameworkiem do testów jednostkowych, jego główną zaletą jest deklaratywność w porównaniu do JUnit.
 Biblioteka ta pozwala na testowanie zależności między warstwami kodu.
 Przykładem może być testowanie tego czy przypadkiem klasa z warstwy domenowej nie polega na klasach z warstwy obsługi zapytań użytkownika.
-\begin{lstlisting}[caption=Przykład testu w Kotest]
+\begin{lstlisting}[caption=Przykład testu w Kotest, language=Kotlin]
 @Test
 fun `domain classes should not depend on rooting classes`() {
     val forbiddenPackage = "com.example.ui"

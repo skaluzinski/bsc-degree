@@ -1,0 +1,23 @@
+\section{Problemy}
+W czasie implementacji serwera napotkałem wiele problemów wynikających z obranych wyborów pod względem zarówno architektury jak i technologii.
+Z powodu wybrania wielomodularnej architektury problematyczne okazało się wykorzystanie wzajemnie modułów przez siebie.
+Był to częściowo zamierzany efekt, oczekiwałem, że wydzielenie odpowiednich domen utrudni zignorowanie ich granic.
+Problemem okazała się autoryzacja użytkownikam, a dokładnie inaczej rozwijające się potrzeby modułów.
+Wraz z czasem implementacji dochodziłem do wniosku, że nie chciałbym aby zwyczajny użytkownik mógł zostać "nauczycielem" bez odpowiedniej weryfikacji.
+Wymóg ten pojawił się z powodu problemów, które mogą wystąpić gdy zarejestrowane osoby mogłyby udostępniać nieodpowiednie treści.
+Jako twórca systemu ponoszę odpowiedzialność za umieszczane w niej treści oraz jej sposób wykorzystywania.
+Przemyślenia te spowodowały kompletnego logicznego oddzielenia rejestracji ucznia od nauczyciela.
+Dodatkowo uznałem, że jedna osoba mogłaby chcieć używać aplikacji zarówno jako uczeń oraz nauczyciel.
+Z tego powodu rozdzieliłem całkowicie te funkcjonalności, użytkownik może stworzyć zarówno konto nauczycielskie jak i uczniowskie używając tych samych danych.
+
+Wstrzykiwanie zależności w spring bootcie okazało się nie być przystosowane do mojego sposobu implementacji.
+Definicja interfejsów w pod modułach oraz ich przypisanie w głównym, współdzielonym module powoduje, że graf zależności spring boota nie potrafi znaleźć odpowiednich beanów.
+Są one odpowiednie znajdowane w runtime, niestety środowisko programistyczne nie jest w stanie ich interpretować.
+
+Dodatkowo pojawiły się problemy powiązane z spring security, niestety część tych funkcjonalności wymaga konkretnego użycia.
+Sama dokumentacja jest myląca z tego powodu jak wiele zmieniło się z biegiem czasu, w nowszych wersjach tej biblioteki większośc sposobów użycia jest już przestarzałe.
+Niestety większość poradników jak i artykułów pokazuje przestarzałe sposoby implementacji, które nie są już wspierane.
+Również samo użycie spring-security do pomocy w zakresie weryfikacji sesji powodowałoby wymóg wprowadzenia ogromnych zmian w strukturze aplikacji.
+Z tego powodu mechanizm sesji jak i redis został finalnie usunięty z projektu.
+Tranzystywny sposób w jaki zaimplementowane przezemnie klasy zależały od spring-security jak i odwrotnie spodował, że w aplikacji pojawiły się cykliczne zależności.
+Był to jeden z problemów, które chciałem ominąć poprzez zastosowane modularnej architektury.
